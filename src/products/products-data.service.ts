@@ -8,6 +8,7 @@ import { UpdateProductDTO } from './dto/update-product.dto';
 import { EntityManager } from 'typeorm';
 import { Connection } from 'typeorm';
 import { ProductsQuery } from './queries/ProductsQuery.interface';
+
 @Injectable()
 export class ProductsDataService {
   constructor(
@@ -16,7 +17,13 @@ export class ProductsDataService {
     private connection: Connection,
   ) {}
 
-  private products: Array<Product> = [];
+  getProductById(id: string): Promise<Product> {
+    return this.productRepository.findOne(id);
+  }
+
+  getAllProducts(_query_: ProductsQuery): Promise<Product[]> {
+    return this.productRepository.findAll(_query_);
+  }
 
   async addProduct(item: CreateProductDTO): Promise<Product> {
     return this.connection.transaction(async (manager: EntityManager) => {
@@ -33,10 +40,6 @@ export class ProductsDataService {
         .getCustomRepository(ProductRepository)
         .save(productToSave);
     });
-  }
-
-  async deleteProduct(id: string): Promise<void> {
-    this.productRepository.delete(id);
   }
 
   async updateProduct(id: string, item: UpdateProductDTO): Promise<Product> {
@@ -56,11 +59,9 @@ export class ProductsDataService {
     });
   }
 
-  getProductById(id: string): Promise<Product> {
-    return this.productRepository.findOne(id);
+  async deleteProduct(id: string): Promise<void> {
+    this.productRepository.delete(id);
   }
 
-  getAllProducts(_query_: ProductsQuery): Promise<Product[]> {
-    return this.productRepository.findAll(_query_);
-  }
+  private products: Array<Product> = [];
 }
